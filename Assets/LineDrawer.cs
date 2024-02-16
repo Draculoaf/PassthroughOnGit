@@ -6,32 +6,27 @@ using TMPro;
 public class LineDrawer : MonoBehaviour
 {
     [SerializeField] public TextMeshProUGUI  testText, testText2; 
-    
+    private LineRenderer lineRenderer;
+    private int currentIndex = 0;
+    private bool isDrawing = false;
+
     // Start is called before the first frame update
     void Start()
     {
         testText.text = "Nothing to say yet";
+        
+        lineRenderer = GetComponent<LineRenderer>();
+        lineRenderer.positionCount = 0;
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (OVRInput.GetDown(OVRInput.Button.PrimaryIndexTrigger))
-        {
-            //Draw a line
-            testText.text = "button down";
-        }
-        else if (OVRInput.GetUp(OVRInput.Button.PrimaryIndexTrigger))
-        {
-            testText.text = "button up";
-            
-        }
-
-        GetContollerPosition();
+        DrawLine();
     }
     
     //Get the position and rotation of the controller
-    private void GetContollerPosition()
+    private void DrawLine()
     {
         OVRPose objectPose = new OVRPose()
         
@@ -45,5 +40,29 @@ public class LineDrawer : MonoBehaviour
 
         //GameObject.Instantiate((some object to instantiate), worldObjectPose.position, worldObjectPose.orientation);
         testText2.text = worldObjectPose.position.ToString() + worldObjectPose.orientation.ToString();
+        
+        
+        
+        if (OVRInput.GetDown(OVRInput.Button.SecondaryIndexTrigger))
+        {
+            isDrawing = true;
+            testText.text = "button pressed, isDrawing is:  " + isDrawing.ToString();
+        }
+
+        if (OVRInput.GetUp(OVRInput.Button.SecondaryIndexTrigger))
+        {
+            isDrawing = false;
+            testText.text = "button lifted, isDrawing is:  " + isDrawing.ToString();
+        }
+
+        if (isDrawing)
+        {
+            Vector3 newPosition = worldObjectPose.position; // Use controller position for drawing
+            lineRenderer.positionCount = currentIndex + 1;
+            lineRenderer.SetPosition(currentIndex, newPosition);
+            currentIndex++;
+        }
     }
+
+  
 }
